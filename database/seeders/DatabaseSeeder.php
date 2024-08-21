@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Tenant;
+use App\Models\Tenant\Employee;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,10 +30,22 @@ class DatabaseSeeder extends Seeder
 
         $tenant->domains()->create(
             attributes: [
-                'domain' => 'daycode.localhost'
+                'domain' => 'daycode',
             ]
         );
 
         $user->tenants()->attach($tenant->id);
+
+        Tenant::all()->runForEach(
+            callable: function ($tenant) use ($user) {
+                Employee::create(
+                    attributes: [
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'position' => 'PIC',
+                    ]
+                );
+            }
+        );
     }
 }

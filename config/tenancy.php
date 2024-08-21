@@ -7,7 +7,6 @@ use Stancl\Tenancy\Database\Models\Domain;
 return [
     'tenant_model' => \App\Models\Tenant::class,
     'id_generator' => null,
-
     'domain_model' => Domain::class,
 
     /**
@@ -16,8 +15,8 @@ return [
      * Only relevant if you're using the domain or subdomain identification middleware.
      */
     'central_domains' => [
+        env('APP_CENTRAL_DOMAIN', 'localhost'),
         '127.0.0.1',
-        'localhost',
     ],
 
     /**

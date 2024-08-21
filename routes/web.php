@@ -1,12 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
 
-foreach (config('tenancy.central_domains') as $domain) {
-    Route::domain($domain)->group(function () {
-        Route::get('/', function () {
-            return view('welcome');
-        });
-    });
-}
+    dd(auth()->user());
+    return view('welcome');
+});
+
+require __DIR__ . '/auth.php';
