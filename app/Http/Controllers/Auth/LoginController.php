@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\AuthManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 
@@ -22,32 +23,37 @@ class LoginController extends Controller
     }
 
     /**
-     * Handle the login form submission.
+     * Handles the login form submission and redirects the user to the appropriate dashboard based on their tenant domain.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param AuthManager $auth
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function loginFormAction(Request $request): RedirectResponse
+    public function loginFormAction(AuthManager $auth, Request $request): RedirectResponse
     {
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
-        if (!$user) {
-            return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
-            ])->onlyInput('email');
+        if ($auth->attempt($credentials)) {
+
+            return redirect('/');
         }
 
-        $tenant = $user->tenants()->first();
-        $domain = $tenant ? $tenant->domains()->first()->domain : 'default';
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
 
-        if (Auth::attempt($credentials)) {
-            Auth::login($user);
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
 
-            return redirect('http://' . $domain . '.'. config('tenancy.central_domains')[0].':8000' . route('dashboard', absolute: false));
-        }
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }

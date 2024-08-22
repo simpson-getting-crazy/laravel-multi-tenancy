@@ -15,13 +15,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasUuids;
 
     /**
-     * The database connection to use for this model.
-     *
-     * @var string
-     */
-    protected $connection = 'pgsql';
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -53,35 +46,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Get the tenants that the user belongs to.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function tenants(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            related: Tenant::class,
-            table: 'tenant_user',
-            foreignPivotKey: 'user_id',
-            relatedPivotKey: 'tenant_id',
-        );
-    }
-
-    /**
-     * Get the domain associated with the user through the tenant.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOneThrough
-     */
-    public function domain()
-    {
-        return $this->hasOneThrough(
-            related: Domain::class,
-            through: Tenant::class,
-            firstKey: 'id',
-            secondKey: 'tenant_id'
-        );
     }
 }

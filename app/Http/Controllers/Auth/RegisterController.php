@@ -30,32 +30,30 @@ class RegisterController extends Controller
      */
     public function registrationFormAction(Request $request): RedirectResponse
     {
-        $user = User::query()->create(
+        $tenant = Tenant::query()->create(
             attributes: [
+                'id' => Str::snake($request->company_name),
+            ],
+        );
+
+        $domain = $request->sub_domain.'.'.config('tenancy.central_domains')[0];
+
+        $tenant->domains()->create(
+            attributes: [
+                'domain' => $domain,
+            ],
+        );
+
+        Tenant::all()->runForEach(function (Tenant $tenant) use ($request) {
+            User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password,
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
-            ]
-        );
+            ]);
+        });
 
-        $tenant = Tenant::query()->create(
-            attributes: [
-                'name' => Str::snake($request->company_name),
-            ]
-        );
-
-        $tenant->domains()->create(
-            attributes: [
-                'domain' => $request->sub_domain.'.'.config('tenancy.central_domains')[0],
-            ]
-        );
-
-        $user->tenants()->attach($tenant->id);
-
-        return redirect()
-            ->route('login.form')
-            ->with('toastSuccess', 'Registraion Successfully');
+        return redirect(tenant_route($domain, 'auth:login:form'));
     }
 }

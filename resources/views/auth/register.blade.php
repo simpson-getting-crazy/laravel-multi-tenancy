@@ -18,7 +18,7 @@
         </div>
 
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form class="space-y-6" action="{{ route('register.action') }}" method="POST">
+            <form class="space-y-6" action="{{ route('pages:auth:register:action') }}" method="POST">
 
                 <input type="hidden" name="_token" value="{{ csrf_token() }}" />
 
